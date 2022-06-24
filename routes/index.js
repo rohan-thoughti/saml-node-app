@@ -6,8 +6,6 @@ var passport = require("passport");
 
 const userAgentHandler = (req, res, next) => {
   const agent = useragent.parse(req.headers["user-agent"]);
-  console.log("AGENT---------------\n", agent);
-  debugger;
   const deviceInfo = Object.assign(
     {},
     {
@@ -16,7 +14,7 @@ const userAgentHandler = (req, res, next) => {
     }
   );
   req.device = deviceInfo;
-  debugger;
+
   next();
 };
 
@@ -56,16 +54,12 @@ createUserSession = async (req, res) => {
     firstName: req.samlUserObject.firstName,
     lastName: req.samlUserObject.lastName,
   };
-
-  console.log("USER------------------\n");
-  debugger;
   // user = null;
   if (!user) {
     return res.send({
       error: "User Not Found",
     });
   }
-  console.log(user, "users");
   return res.send(user);
   // const ssoResponse = loginDto.createSSORespSameAsDeep(req.userDetails, user);
   // const session = await sessionService
@@ -86,8 +80,6 @@ router.post(
     const parser = new Saml2js(xmlResponse);
 
     req.samlUserObject = parser.toObject();
-    console.log("Object---------------------\n", req.samlUserObject);
-    debugger;
     next();
   },
   (req, res) => createUserSession(req, res)
