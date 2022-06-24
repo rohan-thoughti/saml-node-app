@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const express = require("express");
 const useragent = require("useragent");
 const Saml2js = require("saml2js");
 var passport = require("passport");
@@ -26,7 +25,6 @@ const userAgentHandler = (req, res, next) => {
 router.get(
   "/login/sso",
   passport.authenticate("saml", {
-    additionalParams: { email: "rohans-dev@onelogin.com" },
     successRedirect: "/",
     failureRedirect: "/login",
   }),
@@ -54,20 +52,12 @@ createUserSession = async (req, res) => {
     firstName: req.samlUserObject.firstName,
     lastName: req.samlUserObject.lastName,
   };
-  // user = null;
   if (!user) {
     return res.send({
       error: "User Not Found",
     });
   }
   return res.send(user);
-  // const ssoResponse = loginDto.createSSORespSameAsDeep(req.userDetails, user);
-  // const session = await sessionService
-  // .createSession(user, null, false, req.deviceInfo, true, ssoResponse);
-  // const token = cassandraUtil.generateTimeuuid();
-  // await redisUtil.save(token, session.data, 60);
-  // res.cookie('Authorization', session);
-  // return res.redirect(302, `${process.env.DOMAIN_URL}/validate-sso-token?token=${token}`);
 };
 
 router.post(
