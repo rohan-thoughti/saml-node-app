@@ -1,21 +1,24 @@
 const router = require("express").Router();
 const useragent = require("useragent");
 const Saml2js = require("saml2js");
-var passport = require("passport");
+const passport = require("passport");
 
 const userAgentHandler = (req, res, next) => {
-  const agent = useragent.parse(req.headers["user-agent"]);
-  const deviceInfo = Object.assign(
-    {},
-    {
-      device: agent.device,
-      os: agent.os,
-    }
-  );
-  req.device = deviceInfo;
+    const agent = useragent.parse(req.headers["user-agent"]);
+    const deviceInfo = Object.assign({}, {
+        device: agent.device,
+        os: agent.os,
+    });
+    req.device = deviceInfo;
 
-  next();
+    next();
 };
+
+router.get("/", (req, res) => {
+    return res.status(200).send({
+        message: "SAML App running."
+    });
+});
 
 /**
  * This Route Authenticates req with IDP
@@ -23,19 +26,19 @@ const userAgentHandler = (req, res, next) => {
  * If Session is not active it redirects to IDP's login form
  */
 router.get(
-  "/login/sso",
-  passport.authenticate("saml", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  }),
+    "/login/sso",
+    passport.authenticate("saml", {
+        successRedirect: "/",
+        failureRedirect: "/login",
+    }),
 
-  function (req, res) {
-    res.send({
-      status: true,
-      message: "Success!",
-    });
-    res.redirect("/");
-  }
+    function (req, res) {
+        res.send({
+            status: true,
+            message: "Success!",
+        });
+        res.redirect("/");
+    }
 );
 /**
  * This is the callback URL
@@ -46,33 +49,36 @@ router.get(
  */
 
 createUserSession = async (req, res) => {
-  var user = {
-    id: req.samlUserObject.id,
-    email: req.samlUserObject.email,
-    firstName: req.samlUserObject.firstName,
-    lastName: req.samlUserObject.lastName,
-  };
-  if (!user) {
-    return res.send({
-      error: "User Not Found",
-    });
-  }
-  return res.send(user);
+    var user = {
+        id: req.samlUserObject.id,
+        email: req.samlUserObject.email,
+        firstName: req.samlUserObject.firstName,
+        lastName: req.samlUserObject.lastName,
+    };
+    if (!user) {
+        return res.send({
+            error: "User Not Found",
+        });
+    }
+    return res.send(user);
 };
 
 router.post(
-  "/login/sso/callback",
-  userAgentHandler,
-  passport.authenticate("saml", { failureRedirect: "/", failureFlash: true }),
-  (req, res, next) => {
-    const xmlResponse = req.body.SAMLResponse;
+    "/login/sso/callback",
+    userAgentHandler,
+    passport.authenticate("saml", {
+        failureRedirect: "/",
+        failureFlash: true
+    }),
+    (req, res, next) => {
+        const xmlResponse = req.body.SAMLResponse;
 
-    const parser = new Saml2js(xmlResponse);
+        const parser = new Saml2js(xmlResponse);
 
-    req.samlUserObject = parser.toObject();
-    next();
-  },
-  (req, res) => createUserSession(req, res)
+        req.samlUserObject = parser.toObject();
+        next();
+    },
+    (req, res) => createUserSession(req, res)
 );
 
 module.exports = router;
