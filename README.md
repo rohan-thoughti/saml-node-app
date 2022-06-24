@@ -10,6 +10,6 @@ $ nodemon app.js
 
 $npm run dev
 
-## Create account in OneLogin and Okta
+## Create account in OneLogin
 
 https://www.onelogin.com/developer-signup
